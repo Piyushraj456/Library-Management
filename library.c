@@ -25,6 +25,13 @@ struct books{
 FILE *fp;
 
 
+void addBook();
+void viewBook();
+void removeBook(); 
+void issueBook(); 
+void searchBook(); 
+void submitBook(); 
+void issueList();        
 int main(){
     
     int ch;
@@ -269,7 +276,7 @@ void issueList(){
 }
 void searchBook() {
     char searchName[50];
-    int found = 0;
+    int found = 0,i;
 
     system("cls");
     printf("<=======================Search Book=======================>\n\n");
@@ -281,7 +288,7 @@ void searchBook() {
     // Convert the search name to lowercase for case-insensitive comparison
     char lowercaseSearchName[50];
     strcpy(lowercaseSearchName, searchName);
-    for (int i = 0; lowercaseSearchName[i]; i++) {
+    for ( i = 0; lowercaseSearchName[i]; i++) {
         lowercaseSearchName[i] = tolower(lowercaseSearchName[i]);
     }
 
@@ -291,7 +298,7 @@ void searchBook() {
         // Convert the current book name to lowercase for case-insensitive comparison
         char bookName[50];
         strcpy(bookName, b.bookName);
-        for (int i = 0; bookName[i]; i++) {
+        for (i = 0; bookName[i]; i++) {
             bookName[i] = tolower(bookName[i]);
         }
 
