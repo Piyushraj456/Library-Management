@@ -1,0 +1,320 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <ctype.h>
+
+struct Books {
+    int id;
+    char bookName[50];
+    char authorName[50];
+    char date[15];
+    struct Books *next;
+}b;
+
+struct Students {
+    int id;
+    char sName[50];
+    char sClass[50];
+    int sRoll;
+    char bookName[50];
+    char date[15];
+    struct Students *next;
+}s;
+
+struct Books *bookList = NULL;
+struct Students *studentList = NULL;
+
+void addBook();
+void viewBook();
+void removeBook();
+void issueBook();
+void searchBook();
+void submitBook();
+void issueList();
+
+int main() {
+    int ch;
+    while (1) {
+        system("cls");
+        printf("<===============Library Management System===============>\n");
+        printf("1.Add Book\n");
+        printf("2.View Books\n");
+        printf("3.Remove Book\n");
+        printf("4.Issue Book\n");
+        printf("5.Search Book\n");
+        printf("6.Submit Book\n");
+        printf("7.View Issued  Book\n");
+        printf("8. Exit\n");
+        printf("<===============xxxxxxxxxxxxxxxxxxxxxxxxxx===============>\n");
+
+        printf("Enter Your Choice: ");
+        scanf("%d", &ch);
+
+        switch (ch) {
+            case 1:
+                addBook();
+                break;
+            case 2:
+                viewBook();
+                break;
+            case 3:
+                removeBook();
+                break;
+            case 4:
+                issueBook();
+                break;
+            case 5:
+                searchBook();
+                break;
+            case 6:
+                submitBook();
+                break;
+            case 7:
+                issueList();
+                break;
+            case 8:
+                exit(0);
+                break;
+            default:
+                printf("\nInvalid Choice...\n");
+        }
+        printf("\nPress any Key to Continue...");
+        getch();
+    }
+
+    return 0;
+}
+
+void addBook() {
+    char myDate[15];
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(myDate, "%02d/%02d/%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+
+    struct Books *newBook = (struct Books *)malloc(sizeof(struct Books));
+    if (newBook == NULL) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+
+    newBook->id = bookList ? bookList->id + 1 : 1;
+    strcpy(newBook->date, myDate);
+
+    printf("Enter Book Name: ");
+    fflush(stdin);
+    gets(newBook->bookName);
+    printf("Enter Author Name: ");
+    fflush(stdin);
+    gets(newBook->authorName);
+
+    newBook->next = bookList;
+    bookList = newBook;
+
+    printf("Book Added Successfully: \n");
+}
+
+void viewBook() {
+    system("cls");
+    printf("<===============Available Books===============>\n\n");
+    printf("%-10s %-30s %-20s %s\n\n", "Book id", "Book Name", "Author", "Date");
+
+    struct Books *currentBook = bookList;
+    while (currentBook != NULL) {
+        printf("%-10d %-30s %-20s %s\n", currentBook->id, currentBook->bookName, currentBook->authorName,
+               currentBook->date);
+        currentBook = currentBook->next;
+    }
+}
+
+void removeBook() {
+    int id, found = 0;
+    system("cls");
+    printf("<===============Remove Books===============>\n\n");
+    printf("Enter Book id to remove: ");
+    scanf("%d", &id);
+
+    struct Books *currentBook = bookList;
+    struct Books *prevBook = NULL;
+
+    while (currentBook != NULL) {
+        if (id == currentBook->id) {
+            found = 1;
+            break;
+        }
+        prevBook = currentBook;
+        currentBook = currentBook->next;
+    }
+
+    if (found) {
+        if (prevBook == NULL) {
+            // If the book to be removed is the first in the list
+            bookList = currentBook->next;
+        } else {
+            prevBook->next = currentBook->next;
+        }
+        free(currentBook);
+        printf("\nDeleted Successfully...");
+    } else {
+        printf("\nRecord Not Found !");
+    }
+}
+
+void issueBook() {
+    char myDate[12];
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(myDate, "%02d/%02d/%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+
+    int f = 0;
+
+    system("cls");
+    printf("<== Issue Books ==>\n\n");
+
+    struct Books *currentBook;
+
+    printf("Enter Book id to issue: ");
+    scanf("%d", &s.id);
+
+    // Check if we have the book of the given id
+    currentBook = bookList;
+
+    while (currentBook != NULL) {
+        if (currentBook->id == s.id) {
+            strcpy(s.bookName, currentBook->bookName);
+            f = 1;
+            break;
+        }
+        currentBook = currentBook->next;
+    }
+
+    if (f == 0) {
+        printf("No book found with this id\n");
+        printf("Please try again...\n\n");
+        return;
+    }
+
+    printf("Enter Student Name: ");
+    fflush(stdin);
+    gets(s.sName);
+
+    printf("Enter Student Class: ");
+    fflush(stdin);
+    gets(s.sClass);
+
+    printf("Enter Student Roll: ");
+    scanf("%d", &s.sRoll);
+
+    struct Students *newStudent = (struct Students *)malloc(sizeof(struct Students));
+    if (newStudent == NULL) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+
+    newStudent->id = s.id;
+    strcpy(newStudent->sName, s.sName);
+    strcpy(newStudent->sClass, s.sClass);
+    newStudent->sRoll = s.sRoll;
+    strcpy(newStudent->bookName, s.bookName);
+    strcpy(newStudent->date, myDate);
+
+    newStudent->next = studentList;
+    studentList = newStudent;
+
+    printf("Book Issued Successfully\n\n");
+}
+
+void submitBook() {
+    int bookId;
+    int found = 0;
+
+    system("cls");
+    printf("<===============Submit Book===============>\n\n");
+
+    printf("Enter Book ID to submit: ");
+    scanf("%d", &bookId);
+
+    struct Students *currentStudent = studentList;
+    struct Students *prevStudent = NULL;
+
+    while (currentStudent != NULL) {
+        if (currentStudent->id == bookId) {
+            found = 1;
+            printf("\nBook with ID %d has been submitted by %s\n", bookId, currentStudent->sName);
+            break;
+        }
+        prevStudent = currentStudent;
+        currentStudent = currentStudent->next;
+    }
+         if (found) {
+        if (prevStudent == NULL) {
+            // If the student to be removed is the first in the list
+            studentList = currentStudent->next;
+        } else {
+            prevStudent->next = currentStudent->next;
+        }
+        free(currentStudent);
+        printf("\nBook has been successfully submitted.\n");
+    } else {
+        printf("\nBook with ID %d is not currently issued.\n", bookId);
+    }
+}
+
+void issueList() {
+    system("cls");
+    printf("<===============Book Issued List===============>\n\n");
+    printf("%-10s %-30s %-20s %-10s %-30s %s\n\n", "S.id", "Name", "Class", "Roll", "Book Name", "Date");
+
+    struct Students *currentStudent = studentList;
+    while (currentStudent != NULL) {
+        printf("%-10d %-30s %-20s %-10d %-30s %s\n", currentStudent->id, currentStudent->sName, currentStudent->sClass,
+               currentStudent->sRoll, currentStudent->bookName, currentStudent->date);
+        currentStudent = currentStudent->next;
+    }
+}
+
+void searchBook() {
+    char searchName[50];
+    int found = 0, i;
+
+    system("cls");
+    printf("<=======================Search Book=======================>\n\n");
+
+    printf("Enter Book Name to search: ");
+    fflush(stdin);
+    gets(searchName);
+
+    // Convert the search name to lowercase for case-insensitive comparison
+    char lowercaseSearchName[50];
+    strcpy(lowercaseSearchName, searchName);
+    for (i = 0; lowercaseSearchName[i]; i++) {
+        lowercaseSearchName[i] = tolower(lowercaseSearchName[i]);
+    }
+
+    struct Books *currentBook = bookList;
+
+    while (currentBook != NULL) {
+        // Convert the current book name to lowercase for case-insensitive comparison
+        char bookName[50];
+        strcpy(bookName, currentBook->bookName);
+        for (i = 0; bookName[i]; i++) {
+            bookName[i] = tolower(bookName[i]);
+        }
+
+        // Check if the search name is a substring of the book name
+        if (strstr(bookName, lowercaseSearchName) != NULL) {
+            found = 1;
+            printf("\nBook Found!\n");
+            printf("%-10s %-30s %-20s %s\n", "Book id", "Book Name", "Author", "Date");
+            printf("%-10d %-30s %-20s %s\n", currentBook->id, currentBook->bookName, currentBook->authorName,
+                   currentBook->date);
+        }
+        currentBook = currentBook->next;
+    }
+
+    if (!found) {
+        printf("\nBook with name \"%s\" not found.\n", searchName);
+    }
+}
+
+
